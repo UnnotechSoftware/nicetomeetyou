@@ -23,11 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY", "&nl8s430j^j8l*je+m&ys5dv#zoy)0a2+x1!m8hx290_sx&0gh")
 
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = int(os.environ.get("DEBUG", default=1))
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1").split(" ")
+CORS_ALLOW_ALL_ORIGINS = True  # FIXME 危 !!
+# CORS_ALLOWED_ORIGIN  # FIXME
+# CORS_ALLOWED_ORIGIN_REGEXES  # FIXME
 
 # Application definition
 
@@ -44,6 +46,8 @@ INSTALLED_APPS = [
     'channels',
     'django_celery_beat',
     'news',
+    'corsheaders',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [
@@ -54,6 +58,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -153,6 +159,8 @@ CELERY_TASK_QUEUES = (
     Queue('high_priority'),
     Queue('low_priority'),
 )
+
+
 # CELERY_TASK_ROUTES = {
 #     'core.celery.*': {
 #         'queue': 'high_priority',
@@ -178,7 +186,6 @@ CHANNEL_LAYERS = {
     },
 }
 
-
 # REST framework
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
@@ -192,8 +199,6 @@ REST_FRAMEWORK = {
     #     "rest_framework.filters.OrderingFilter",
     # ],
 }
-
-
 
 """
 So if some error gets raised in the view, and we do not catch it, 
