@@ -1,0 +1,25 @@
+version: '3.5'
+
+networks:
+  web_network:
+    external: true
+    name: web_network
+  frontend:
+    name: frontend
+
+services:
+  frontend:
+    container_name: frontend
+    image: frontend:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: production-stage
+    expose:
+      - "80"
+    ports:
+      - "127.0.0.1:40001:80"
+      - "127.0.0.1:50327:5557"  # flower monitor celery worker
+    networks:
+      - frontend
+      - web_network
