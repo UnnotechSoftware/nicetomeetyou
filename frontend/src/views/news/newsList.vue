@@ -16,13 +16,8 @@
             border
             v-if="tableData.length > 0"
         >
-          <el-table-column label="標的名稱" align="center" width="220" prop="issue_name"/>
-          <el-table-column label="ISIN" align="center" width="auto" prop="isin"/>
-          <el-table-column label="Moody's" align="center" width="auto" prop="credit_rating_moody"/>
-          <el-table-column label="Fitch" align="center" width="auto" prop="credit_rating_fitch"/>
-          <el-table-column label="SP" align="center" width="auto" prop="credit_rating_sp"/>
-          <el-table-column label="發行人" align="center" width="220" prop="issuer"/>
-          <el-table-column label="幣別" align="center" width="auto" prop="currency"/>
+          <el-table-column label="ID" align="center" width="220" prop="id"/>
+          <el-table-column label="標題" align="center" width="auto" prop="title"/>
           <el-table-column label="操作" align="center" width="auto" prop="operation">
             <template #default="scope">
               <el-row justify="center">
@@ -43,13 +38,8 @@
             v-else
             border
         >
-          <el-table-column label="標的名稱" align="center" width="auto" prop="issue_name"/>
-          <el-table-column label="ISIN" align="center" width="auto" prop="isin"/>
-          <el-table-column label="Moody's" align="center" width="auto" prop="credit_rating_moody"/>
-          <el-table-column label="Fitch" align="center" width="auto" prop="credit_rating_fitch"/>
-          <el-table-column label="SP" align="center" width="auto" prop="credit_rating_sp"/>
-          <el-table-column label="發行人" align="center" width="auto" prop="issuer"/>
-          <el-table-column label="幣別" align="center" width="auto" prop="currency"/>
+          <el-table-column label="ID" align="center" width="220" prop="id"/>
+          <el-table-column label="title" align="center" width="auto" prop="title"/>
           <el-table-column label="操作" align="center" width="auto" prop="operation"/>
         </el-table>
         <el-row>
@@ -70,7 +60,7 @@
     </div>
   </div>
   <DialogDetail :detailShow="detailShow"
-                @closeDetailBond="detailShow = false"
+                @closeDetailNews="detailShow = false"
                 :detailData="detailData"
   />
 </template>
@@ -96,8 +86,8 @@ const handleDetail = (row: any) => {
 }
 
 
-const getBonds = async () => {
-  const resp = await api.get("/bonds")
+const getNews = async () => {
+  const resp = await api.get("/api/news")
   const result = resp.data
   if (result.code === 200) {
     tableData.value = result.data
@@ -108,11 +98,11 @@ const getBonds = async () => {
 }
 
 onMounted(() => {
-  getBonds()
+  getNews()
 })
 
 const handleCurrentChange = async (page: number) => {
-  const resp = await api.get(`/bonds?page=${page}`)
+  const resp = await api.get(`/api/news?page=${page}`)
   const result = resp.data
   if (result.code === 200) {
     tableData.value = result.data
