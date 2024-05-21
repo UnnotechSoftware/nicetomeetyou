@@ -18,6 +18,7 @@
         >
           <el-table-column label="ID" align="center" width="220" prop="id"/>
           <el-table-column label="標題" align="center" width="auto" prop="title"/>
+          <el-table-column label="作者" align="center" width="auto" prop="author_name"/>
           <el-table-column label="操作" align="center" width="auto" prop="operation">
             <template #default="scope">
               <el-row justify="center">
@@ -39,7 +40,8 @@
             border
         >
           <el-table-column label="ID" align="center" width="220" prop="id"/>
-          <el-table-column label="title" align="center" width="auto" prop="title"/>
+          <el-table-column label="標題" align="center" width="auto" prop="title"/>
+          <el-table-column label="作者" align="center" width="auto" prop="author_name"/>
           <el-table-column label="操作" align="center" width="auto" prop="operation"/>
         </el-table>
         <el-row>
@@ -66,13 +68,13 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref, watchEffect} from 'vue'
+import {onMounted, ref, onBeforeUnmount} from 'vue'
 import api from '../../utils/http';
 import DialogDetail from "./components/DialogDetail.vue"
 
 const tableData = ref([])
 const detailShow = ref(false)
-const detailData = ref()
+const detailData = ref([])
 
 
 const page_index = ref(1), // 當前位於哪一頁
@@ -87,7 +89,7 @@ const handleDetail = (row: any) => {
 
 
 const getNews = async () => {
-  const resp = await api.get("/api/news")
+  const resp = await api.get("/news/")
   const result = resp.data
   if (result.code === 200) {
     tableData.value = result.data
@@ -98,11 +100,48 @@ const getNews = async () => {
 }
 
 onMounted(() => {
+  notification()
   getNews()
 })
 
+let socket: WebSocket | null = null;
+
+const notification = () => {
+  const ws_url = `/ws/task_status/`;
+  const ws_protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+  const ws_address = `${ws_protocol}://${location.hostname}:${location.port}${ws_url}`;
+  socket = new WebSocket(ws_address);
+
+  socket.onopen = () => {
+    console.log("WebSocket connection opened");
+  };
+
+  socket.onmessage = (event) => {
+    console.log("Received message from server", event.data);
+    const data = JSON.parse(event.data);
+    // @ts-ignore
+    ElMessage.success(data.message);
+    getNews()
+  };
+
+  socket.onerror = (error) => {
+    console.error("WebSocket error", error);
+  };
+
+  socket.onclose = (event) => {
+    console.log("WebSocket connection closed", event);
+    // Optionally attempt to reconnect here
+  };
+};
+
+onBeforeUnmount(() => {
+  if (socket) {
+    socket.close();
+  }
+});
+
 const handleCurrentChange = async (page: number) => {
-  const resp = await api.get(`/api/news?page=${page}`)
+  const resp = await api.get(`/news/?page=${page}`)
   const result = resp.data
   if (result.code === 200) {
     tableData.value = result.data
@@ -113,7 +152,7 @@ const handleCurrentChange = async (page: number) => {
 }
 
 const setPaginations = (pageMeta: any) => {
-  total.value = pageMeta.total
+  total.value = pageMeta.count
   page_index.value = pageMeta.page;
   page_size.value = pageMeta.per_page;
 }

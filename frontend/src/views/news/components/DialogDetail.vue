@@ -14,14 +14,18 @@
     >
       <el-form-item
           prop="content"
-          label="內容">
+          v-model="formData.content"
+      >
         <el-input
             v-model="formData.content"
+            type="textarea"
+            :rows="30"
             :readonly="true"
             :disabled="true"/>
       </el-form-item>
       <el-form-item class="text-right">
         <el-button @click="handleClose">取消</el-button>
+
       </el-form-item>
     </el-form>
   </el-dialog>
@@ -49,7 +53,6 @@ const handleClose = () => {
 }
 
 const emits = defineEmits(["closeDetailNews"])
-
 
 watch(() => props.detailData
     , () => {
