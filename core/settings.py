@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "&nl8s430j^j8l*je+m&ys5dv#zoy)0a2+x1!m
 DEBUG = int(os.environ.get("DEBUG", default=1))
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1").split(" ")
-CORS_ALLOW_ALL_ORIGINS = True  # FIXME 危 !!
+CORS_ALLOW_ALL_ORIGINS = True  # FIXME
 # CORS_ALLOWED_ORIGIN  # FIXME
 # CORS_ALLOWED_ORIGIN_REGEXES  # FIXME
 
@@ -42,14 +42,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'polls',
     'channels',
     'django_celery_beat',
-    'news',
+    'apps.news',
     'corsheaders',
     'drf_yasg'
 ]
-
+APPEND_SLASH = True
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -143,29 +142,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", "redis://127.0.0.1:6379/0")
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_BACKEND", "redis://127.0.0.1:6379/0")
 CELERY_BEAT_SCHEDULE = {
-    'task-clear-session': {
-        'task': 'task_clear_session',
-        "schedule": 5.0,  # five seconds
+    'news-crawler': {
+        'task': 'news_crawler',
+        "schedule": 60 * 60,  # 1 hour
     },
 }
 CELERY_TASK_DEFAULT_QUEUE = 'default'
 
 # Force all queues to be explicitly listed in `CELERY_TASK_QUEUES` to help prevent typos
 CELERY_TASK_CREATE_MISSING_QUEUES = False
-
 CELERY_TASK_QUEUES = (
-    # need to define default queue here or exception would be raised
     Queue('default'),
     Queue('high_priority'),
     Queue('low_priority'),
 )
-
-
-# CELERY_TASK_ROUTES = {
-#     'core.celery.*': {
-#         'queue': 'high_priority',
-#     },
-# }
 
 
 def route_task(name, args, kwargs, options, task=None, **kw):
@@ -176,7 +166,6 @@ def route_task(name, args, kwargs, options, task=None, **kw):
 
 
 CELERY_TASK_ROUTES = (route_task,)
-
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
@@ -192,28 +181,4 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
     'DEFAULT_PAGINATION_CLASS': 'nicetomeetyou.news.pagination.CustomPagination',
-    # "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    # "DEFAULT_PAGINATION_CLASS": "utils.paginations.StandardResultsSetPagination",
-    # "DEFAULT_FILTER_BACKENDS": [
-    #     "django_filters.rest_framework.DjangoFilterBackend",
-    #     "rest_framework.filters.OrderingFilter",
-    # ],
 }
-
-"""
-So if some error gets raised in the view, and we do not catch it, 
-then the transaction would roll back.
-
-If you want to use transaction.atomic for all view functions, 
-you can set ATOMIC_REQUESTS to True in your Django settings file:
-
-
-ATOMIC_REQUESTS=True
-
-# or
-
-DATABASES["default"]["ATOMIC_REQUESTS"] = True
-
-You can then override the behavior so that the view runs in autocommit mode:
-@transaction.non_atomic_requests
-"""
