@@ -28,7 +28,6 @@ def get_single_news(url):
         'url': url
     }
     obj = News.objects.create(**data)  # noqa
-    notify_frontend()
 
 
 @custom_celery_task()
@@ -57,5 +56,5 @@ def task_postrun_handler(task_id, *args, **kwargs):
     When celery task finish, send notification to Django channel_layer, so Django channel would receive
     the event and then send it to web client
     """
-    if kwargs["sender"].name == 'get_single_news':
+    if kwargs["sender"].name == 'news_crawler':
         notify_frontend()
