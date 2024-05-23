@@ -15,7 +15,7 @@
 
 ## 本次實作說明
 ### 後端
-使用Django RESTful framework 完成後端功能
+使用Django REST framework 完成後端功能
 
 1. 有完成客製化分頁，結構如下
     ```json
@@ -42,7 +42,8 @@
     }
     ```
 ### 前端
-使用Vue3，設計簡易的管理後台畫面
+使用Vue3，設計簡易的管理後台畫面，請選擇左側欄 新聞 → 新聞列表
+![frontend.png](frontend.png)
 
 ### 即時爬蟲且利用Websocket通知
 ![websocket.png](websocket.png)
@@ -52,12 +53,12 @@
 
 ### 部署
 使用DigitalOcean的200美元的體驗方案，目前沒有買域名，使用droplet的public ip
-訪問 http://24.199.99.60:40001
+訪問 http://24.199.99.60:40001 請選擇左側欄 新聞 → 新聞列表，即可看到資訊
 
 所有服務均容器化，本地啟動請使用
 
 ```bash
 $ bash run_local_server.sh
 ```
-
+並未解決大流量網訪問議題(100 QPS)，僅單純一台server部署完全容器化的服務。
 注意服務只有開放至 20240603 (也有可能提早，若已經通知本次測驗結果) 。
