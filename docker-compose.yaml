@@ -4,7 +4,6 @@ networks:
   web_network:
     name: web_network
   frontend:
-    external: true
     name: frontend
 
 services:
