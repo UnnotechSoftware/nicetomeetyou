@@ -1,0 +1,98 @@
+version: '3.8'
+
+networks:
+  web_network:
+    name: web_network
+  frontend:
+    name: frontend
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: django_app_web:beta
+    command: /start.sh
+    volumes:
+      - .:/app
+    ports:
+      - "8010:8000"
+    env_file:
+      - ./env/.dev-sample
+    depends_on:
+      - redis
+      - db
+    networks:
+      - frontend
+      - web_network
+
+  db:
+    image: postgres:14-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=hello_django
+      - POSTGRES_USER=hello_django
+      - POSTGRES_PASSWORD=hello_django
+    networks:
+      - web_network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - web_network
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: django_app_web:beta
+    command: /start-celeryworker.sh
+    volumes:
+      - .:/app
+    env_file:
+      - ./env/.dev-sample
+    depends_on:
+      - redis
+      - db
+    networks:
+      - web_network
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: django_app_web:beta
+    command: /start-celerybeat.sh
+    volumes:
+      - .:/app
+    env_file:
+      - ./env/.dev-sample
+    depends_on:
+      - redis
+      - db
+    networks:
+      - web_network
+
+  flower:
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: django_app_web:beta
+    command: /start-flower.sh
+    volumes:
+      - .:/app
+    env_file:
+      - ./env/.dev-sample
+    ports:
+      - "5557:5555"
+    depends_on:
+      - redis
+      - db
+    networks:
+      - frontend
+      - web_network
+volumes:
+  postgres_data:

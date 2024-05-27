@@ -1,0 +1,25 @@
+version: '3.5'
+
+networks:
+  web_network:
+    external: true
+    name: web_network
+  frontend:
+    external: true
+    name: frontend
+
+services:
+  frontend:
+    container_name: frontend
+    image: frontend:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: production-stage
+    expose:
+      - "80"
+    ports:
+      - "40001:80"
+    networks:
+      - frontend
+      - web_network
