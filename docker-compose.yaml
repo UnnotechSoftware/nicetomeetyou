@@ -2,8 +2,7 @@ version: '3.8'
 
 services:
   cache:
-    image: redis:6.0.9
-    container_name: nicetomeetyou-cache
+    image: redis:latest
     restart: always
     ports:
       - "6379:6379"
@@ -11,10 +10,30 @@ services:
       - redis-data:/data
     command: redis-server
     networks:
-      - redis-network
+      - nicetomeetyou
+  api-service:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    restart: always
+    depends_on:
+      - cache
+    networks:
+      - nicetomeetyou
+  crawler:
+    build:
+      context: ./crawler
+    restart: always
+    depends_on:
+      - api-service
+      - cache
+    networks:
+      - nicetomeetyou
 
 volumes:
   redis-data:
 
 networks:
-  redis-network:
+  nicetomeetyou:
+    driver: bridge
