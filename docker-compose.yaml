@@ -30,6 +30,9 @@ services:
       - cache
     networks:
       - nicetomeetyou
+    environment:
+      - CELERY_BROKER_URL=redis://cache:6379/0
+      - BACKEND_IP_ADDR=api-service:8000
 
 volumes:
   redis-data:

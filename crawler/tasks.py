@@ -1,5 +1,8 @@
+import os
+
 from celery.utils.log import get_task_logger
 from crawler import app
+from dotenv import load_dotenv
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -7,6 +10,7 @@ from pprint import pformat
 
 
 logger = get_task_logger(__name__)
+load_dotenv()
 
 
 @app.task
@@ -61,7 +65,8 @@ def get_timelines_info(url: str) -> dict:
 
 @app.task
 def process():
-    ip_addr = 'api-service:8000'
+    # ip_addr = 'api-service:8000'
+    ip_addr = os.getenv('BACKEND_IP_ADDR')
     urls = get_news_urls()
     for title, url in urls.items():
         logger.info(f'>>> title: {title} <<<')

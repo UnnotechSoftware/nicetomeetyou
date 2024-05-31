@@ -1,6 +1,10 @@
 from datetime import timedelta
+from dotenv import load_dotenv
+import os
 
-broker_url = 'redis://cache:6379/0'
+load_dotenv()
+
+broker_url = os.getenv('CELERY_BROKER_URL')
 result_backend = 'db+sqlite:///db.sqlite3'
 result_serializer = 'json'
 result_expires = 60 * 60 * 24
