@@ -36,6 +36,7 @@ ALLOWED_HOSTS = ['api-service', '127.0.0.1', 'localhost']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,6 +46,8 @@ INSTALLED_APPS = [
     # APIs
     'rest_framework',
     'backend.api',
+    'backend.tasks',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -176,4 +179,12 @@ CACHES = {
     }
 }
 
+# Channel
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
+# Asgi
+ASGI_APPLICATION = 'backend.asgi.application'

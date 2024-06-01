@@ -8,6 +8,7 @@ from rest_framework import status
 from backend.api.models import News
 from backend.api.serializers import NewsDetailSerializers
 from backend.api.serializers import NewsTimelineSerializers
+from backend.tasks.notifications import send_notification
 
 
 logger = logging.getLogger(__name__)
@@ -36,6 +37,7 @@ class NewsTimeLine(APIView):
         serializer = NewsTimelineSerializers(data=data)
         if serializer.is_valid():
             serializer.save()
+            send_notification()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         logger.warning(f'Fail to save the nba news to database.')
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
