@@ -3,5 +3,5 @@ from backend.api import views
 
 urlpatterns = [
     path('news/', views.NewsTimeLine.as_view(), name='news-timeline'),
-    path('news/<int:pk>', views.NewDetail.as_view(), name='news-detail'),
+    path('news/<int:pid>', views.NewDetail.as_view(), name='news-detail'),
 ]
