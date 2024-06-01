@@ -23,6 +23,8 @@ services:
       - nicetomeetyou
     environment:
       - BACKEND_CACHE_URL=redis://cache:6379/1
+    volumes:
+      - static_volume:/root/backend/staticfiles
   crawler:
     build:
       context: ./crawler
@@ -35,9 +37,21 @@ services:
     environment:
       - CELERY_BROKER_URL=redis://cache:6379/0
       - BACKEND_IP_ADDR=api-service:8000
+  proxy:
+    build:
+      context: ./proxy
+    ports:
+      - "80:80"
+    depends_on:
+      - api-service
+    networks:
+      - nicetomeetyou
+    volumes:
+      - static_volume:/app/staticfiles
 
 volumes:
   redis-data:
+  static_volume:
 
 networks:
   nicetomeetyou:
