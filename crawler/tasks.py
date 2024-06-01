@@ -65,7 +65,6 @@ def get_timelines_info(url: str) -> dict:
 
 @app.task
 def process():
-    # ip_addr = 'api-service:8000'
     ip_addr = os.getenv('BACKEND_IP_ADDR')
     urls = get_news_urls()
     for title, url in urls.items():
