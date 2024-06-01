@@ -1,6 +1,7 @@
 import logging
 
 from django.core.cache import cache
+from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -55,3 +56,11 @@ class NewDetail(APIView):
             return Response({}, status=status.HTTP_204_NO_CONTENT)
         serializer = NewsDetailSerializers(news)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+def news_timeline_page(request):
+    return render(request, 'news_timeline.html')
+
+
+def news_detail_page(request, pid):
+    return render(request, 'news_detail.html', {'pid': pid})
