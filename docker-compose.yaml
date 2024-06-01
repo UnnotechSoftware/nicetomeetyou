@@ -21,6 +21,8 @@ services:
       - cache
     networks:
       - nicetomeetyou
+    environment:
+      - BACKEND_CACHE_URL=redis://cache:6379/1
   crawler:
     build:
       context: ./crawler
