@@ -15,6 +15,6 @@ imports = (
 beat_schedule = {
     'every-5-minutes': {
         'task': 'crawler.tasks.process',
-        'schedule': timedelta(seconds=15),
+        'schedule': timedelta(minutes=15),
     }
 }
