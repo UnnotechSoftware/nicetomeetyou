@@ -34,7 +34,7 @@ class NewsTimeLine(APIView):
     def post(self, request):
         data = request.data
         logger.info(f'Received the post nba news request: {data}')
-        serializer = NewsTimelineSerializers(data=data)
+        serializer = NewsDetailSerializers(data=data)
         if serializer.is_valid():
             serializer.save()
             send_notification()
