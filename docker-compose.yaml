@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  cache:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server
+    networks:
+      - nicetomeetyou
+  api-service:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    restart: always
+    depends_on:
+      - cache
+    networks:
+      - nicetomeetyou
+    environment:
+      - BACKEND_CACHE_URL=redis://cache:6379/1
+    volumes:
+      - static_volume:/root/backend/staticfiles
+  crawler:
+    build:
+      context: ./crawler
+    restart: always
+    depends_on:
+      - api-service
+      - cache
+    networks:
+      - nicetomeetyou
+    environment:
+      - CELERY_BROKER_URL=redis://cache:6379/0
+      - BACKEND_IP_ADDR=api-service:8000
+  proxy:
+    build:
+      context: ./proxy
+    ports:
+      - "80:80"
+    depends_on:
+      - api-service
+    networks:
+      - nicetomeetyou
+    volumes:
+      - static_volume:/app/staticfiles
+
+volumes:
+  redis-data:
+  static_volume:
+
+networks:
+  nicetomeetyou:
+    driver: bridge
