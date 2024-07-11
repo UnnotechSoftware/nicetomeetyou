@@ -1,0 +1,41 @@
+version: '3.3'
+
+services:
+  app:
+    container_name: unno-app
+    image: unno-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Dockerfile
+      # Dockerfile.production
+    volumes:
+      - ./app:/app
+    ports:
+      - 8000:8000
+    env_file:
+      - ./envs/app.env
+    command: sh -c "python manage.py runserver 0.0.0.0:8000"
+      # tail -f /dev/null
+      # python manage.py runserver 0.0.0.0:8000
+      # gunicorn unno.wsgi:application
+    networks:
+      - unno
+  db:
+    container_name: unno-postgres
+    image: postgres:14
+    env_file:
+      - ./envs/db.env
+    networks:
+      - unno
+  broker:
+    container_name: unno-redis
+    image: redis:7.0
+    env_file:
+      - ./envs/broker.env
+    networks:
+      - unno
+
+networks:
+  unno:
+    name: unno

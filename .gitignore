@@ -1,0 +1,9 @@
+# cache
+__pycache__
+static
+
+# private
+*.env
+
+# mac
+.DS_Store
