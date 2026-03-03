@@ -1,0 +1,31 @@
+[project]
+name = "udnnews"
+version = "0.1.0"
+description = "Unnotech Backend Engineer Coding Test"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "celery>=5.6.2",
+    "channels-redis>=4.3.0",
+    "channels[daphne]>=4.3.2",
+    "django==5.2",
+    "django-celery-results>=2.6.0",
+    "django-cors-headers>=4.9.0",
+    "django-environ>=0.13.0",
+    "djangorestframework>=3.16.1",
+    "drf-spectacular>=0.29.0",
+    "flower>=2.0.1",
+    "gunicorn>=25.1.0",
+    "psycopg[binary]>=3.3.3",
+    "redis>=7.2.1",
+    "scrapy>=2.14.1",
+    "whitenoise>=6.11.0",
+]
+
+[dependency-groups]
+dev = [
+    "locust>=2.43.3",
+    "pre-commit>=4.5.1",
+    "pyright>=1.1.408",
+    "ruff>=0.15.4",
+]
