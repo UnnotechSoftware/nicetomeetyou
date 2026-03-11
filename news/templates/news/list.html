@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBA 新聞</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f5f5f5; color: #222; }
+    header { background: #1a1a2e; color: #fff; padding: 16px 24px; }
+    header h1 { font-size: 1.5rem; }
+    .container { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+    .card { display: flex; gap: 16px; background: #fff; border-radius: 8px;
+            margin-bottom: 16px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.1);
+            text-decoration: none; color: inherit; }
+    .card:hover { box-shadow: 0 3px 10px rgba(0,0,0,.15); }
+    .card img { width: 140px; height: 90px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+    .card-body { flex: 1; }
+    .card-body h2 { font-size: 1rem; margin-bottom: 6px; }
+    .card-body p { font-size: .85rem; color: #555; line-height: 1.5; }
+    .meta { font-size: .75rem; color: #999; margin-top: 8px; }
+    #sentinel { height: 40px; display: flex; align-items: center; justify-content: center; }
+    .spinner { width: 24px; height: 24px; border: 3px solid #ddd;
+               border-top-color: #1a1a2e; border-radius: 50%;
+               animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #end-msg { text-align: center; color: #bbb; font-size: .85rem; padding: 24px 0; display: none; }
+    #new-banner { display: none; position: sticky; top: 12px; z-index: 10;
+                  background: #1a1a2e; color: #fff; text-align: center;
+                  padding: 10px; border-radius: 8px; cursor: pointer;
+                  font-size: .9rem; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
+    #new-banner:hover { background: #2a2a4e; }
+  </style>
+</head>
+<body>
+  <header><h1>NBA 新聞</h1></header>
+  <div class="container">
+    <div id="new-banner" onclick="loadLatest()"></div>
+    <div id="news-list"></div>
+    <div id="sentinel"><div class="spinner"></div></div>
+    <div id="end-msg">已載入全部新聞</div>
+  </div>
+
+  <script>
+    let nextUrl = '/api/articles/';
+    let loading = false;
+
+    function createCard(article) {
+      const a = document.createElement('a');
+      a.className = 'card';
+      a.href = `/news/${article.id}/`;
+      a.innerHTML = `
+        ${article.img ? `<img src="${article.img}" alt="">` : ''}
+        <div class="card-body">
+          <h2>${article.title}</h2>
+          <p>${article.summary}</p>
+          <div class="meta">${article.author || ''} &nbsp;·&nbsp; ${article.publish_time ? article.publish_time.slice(0, 16).replace('T', ' ') : ''}</div>
+        </div>`;
+      return a;
+    }
+
+    async function loadMore() {
+      if (loading || !nextUrl) return;
+      loading = true;
+
+      const res = await fetch(nextUrl);
+      const data = await res.json();
+
+      const list = document.getElementById('news-list');
+      data.results.forEach(article => list.appendChild(createCard(article)));
+
+      nextUrl = data.next;
+      loading = false;
+
+      if (!nextUrl) {
+        document.getElementById('sentinel').style.display = 'none';
+        document.getElementById('end-msg').style.display = 'block';
+      }
+    }
+
+    async function loadLatest() {
+      const banner = document.getElementById('new-banner');
+      banner.style.display = 'none';
+      banner.dataset.count = '0';
+
+      const res = await fetch('/api/articles/');
+      const data = await res.json();
+
+      const list = document.getElementById('news-list');
+      const existingIds = new Set([...list.querySelectorAll('a')].map(a => a.href));
+
+      const newCards = data.results
+        .filter(a => !existingIds.has(location.origin + `/news/${a.id}/`))
+        .map(createCard)
+        .reverse();
+
+      newCards.forEach(card => list.prepend(card));
+    }
+
+    // 無限滾動
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) loadMore();
+    }, { rootMargin: '200px' });
+    observer.observe(document.getElementById('sentinel'));
+
+    // WebSocket
+    const ws = new WebSocket(`ws://${location.host}/ws/news/`);
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'news_update') {
+        const banner = document.getElementById('new-banner');
+        const accumulated = parseInt(banner.dataset.count || '0') + data.count;
+        banner.dataset.count = accumulated;
+        banner.textContent = `有 ${accumulated} 篇新文章，點此更新`;
+        banner.style.display = 'block';
+      }
+    };
+
+    ws.onclose = () => {
+      // 斷線後 3 秒自動重連
+      setTimeout(() => location.reload(), 3000);
+    };
+  </script>
+</body>
+</html>

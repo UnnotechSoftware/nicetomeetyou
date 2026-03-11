@@ -1,0 +1,13 @@
+django>=5.0
+djangorestframework
+psycopg2-binary
+uvicorn[standard]
+requests
+beautifulsoup4
+python-decouple
+django-redis
+channels
+channels-redis
+pytz
+django-apscheduler
+locust
